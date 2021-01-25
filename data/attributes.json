@@ -1,0 +1,147 @@
+[
+  {
+    "_id": 1,
+    "name": "color",
+    "value": "red"
+  },
+  {
+    "_id": 2,
+    "name": "color",
+    "value": "yellow"
+  },
+  {
+    "_id": 3,
+    "name": "color",
+    "value": "blue"
+  },
+  {
+    "_id": 4,
+    "name": "color",
+    "value": "green"
+  },
+  {
+    "_id": 5,
+    "name": "color",
+    "value": "orange"
+  },
+  {
+    "_id": 6,
+    "name": "color",
+    "value": "black"
+  },
+  {
+    "_id": 7,
+    "name": "production_year",
+    "value": 2010
+  },
+  {
+    "_id": 8,
+    "name": "production_year",
+    "value": 2011
+  },
+  {
+    "_id": 9,
+    "name": "production_year",
+    "value": 2012
+  },
+  {
+    "_id": 10,
+    "name": "production_year",
+    "value": 2013
+  },
+  {
+    "_id": 11,
+    "name": "production_year",
+    "value": 2014
+  },
+  {
+    "_id": 12,
+    "name": "production_year",
+    "value": 2015
+  },
+  {
+    "_id": 13,
+    "name": "production_year",
+    "value": 2016
+  },
+  {
+    "_id": 14,
+    "name": "production_year",
+    "value": 2017
+  },
+  {
+    "_id": 15,
+    "name": "production_year",
+    "value": 2018
+  },
+  {
+    "_id": 16,
+    "name": "production_year",
+    "value": 2019
+  },
+  {
+    "_id": 17,
+    "name": "production_year",
+    "value": 2020
+  },
+  {
+    "_id": 18,
+    "name": "body_material",
+    "value": "mahogany"
+  },
+  {
+    "_id": 19,
+    "name": "body_material",
+    "value": "spruce"
+  },
+  {
+    "_id": 20,
+    "name": "body_material",
+    "value": "maple"
+  },
+  {
+    "_id": 21,
+    "name": "key_count",
+    "value": 16
+  },
+  {
+    "_id": 22,
+    "name": "key_count",
+    "value": 32
+  },
+  {
+    "_id": 23,
+    "name": "key_count",
+    "value": 48
+  },
+  {
+    "_id": 24,
+    "name": "max_tempo",
+    "value": 200
+  },
+  {
+    "_id": 25,
+    "name": "max_tempo",
+    "value": 220
+  },
+  {
+    "_id": 26,
+    "name": "max_tempo",
+    "value": 240
+  },
+  {
+    "_id": 27,
+    "name": "drum_count",
+    "value": 3
+  },
+  {
+    "_id": 28,
+    "name": "drum_count",
+    "value": 5
+  },
+  {
+    "_id": 29,
+    "name": "drum_count",
+    "value": 6
+  }
+]

@@ -1,0 +1,278 @@
+//Klāvs Spruģevics ks20064
+//Python un MongoDB
+
+use MD3
+
+// 1. Loģiskā izteiksme: atlasa preces:
+// discount >= 20%
+// price <= 60
+// stock > 10
+// Sort()
+// Top(5)
+db.Items.find({$and:[{"discount":{$gte:0.2}}, {"price":{$lte:60}}, {stock:{$gt:10}}]}).sort({"price":1}).limit(5)
+
+
+// 2. Atlasa preces, kas pieder pie keys kategorijas un kurām ir atlaide:
+// "Categories.name" == "Keys"
+// exists(discount)
+
+db.Items.aggregate([
+{
+    $match:{"discount":{$exists:true}}
+},
+{
+    $lookup:
+    {
+        from:"Categories",
+        localField:"categories",
+        foreignField:"_id",
+        as:"category"
+    }
+},
+{
+        $project:
+    {
+        _id:0,
+        categories:0,
+        attributes:0,
+        "category._id":0
+    }
+},
+{
+    $match:{"category.name":"Keys"}
+},
+{
+    $sort:{"price":-1}
+},
+{
+    $limit:7
+}])
+
+
+// 3. Atlasa preces,kurām:
+// "Attribute.name" == "color"
+// "Attribute.value" == "blue"
+// "Attribute.production_year" >= 2016
+// "Items.name" contains "a"
+
+db.Items.aggregate([
+{
+    $match:
+    {
+        name:{$regex : ".*a.*"}
+    }
+},
+{
+    $lookup:
+    {
+        from:"Attributes",
+        localField:"attributes",
+        foreignField:"_id",
+        as:"attributes"
+    }
+},
+{
+    $match:
+    {
+        $and:
+        [
+            {"attributes.value":"blue"},
+            {"attributes.name":"color"},
+            {"attributes.value":{$gte:2014}},
+            {"attributes.name":"production_year"}
+        ]
+    }
+},
+{
+    $project:
+    {
+        _id:0,
+        "attributes._id":0
+    }
+},
+{
+    $sort:{"attributes.value":-1}
+},
+{
+    $limit:3
+}])
+
+
+// 4. Aprēķina preču summu grozā
+// "Users.cart_id" == "Carts._id"
+// "Carts.items" -> "Items._id"
+// "Carts.purchased" == "True"
+//  Sum("Items.price")
+
+db.Carts.aggregate([
+{
+    $match:{purchased:true}
+},
+{
+    $lookup:
+    {
+        from:"Items",
+        localField:"items",
+        foreignField:"_id",
+        as:"item_list"
+    }
+},
+{
+    $lookup:
+    {
+        from:"Users",
+        localField:"_id",
+        foreignField:"cart_id",
+        as:"user"
+    }
+},
+{
+    $project:
+    {
+        _id:0,
+        "user":{$concat:[{$arrayElemAt:["$user.first_name",0]}," ",{$arrayElemAt:["$user.last_name",0]}]},
+        "item_names":"$item_list.name",
+        "item_prices":"$item_list.price",
+        purchased:1,
+        date_of_purchase:1,
+        "sum":{$sum:"$item_list.price"},
+    }
+},
+{
+    $limit:5
+}])
+
+
+//5. Aprēķina vidējo iepirkumu summu un vidējo vecumu user, kas ir vecāki par 50 gadiem
+// "Users.cart_id" == "Cards._id"
+// "Users.age" > 50
+// "Carts.items" -> "Items._id"
+// "Carts.purchased" == "True"
+// Avg("Items.price")
+
+db.Carts.aggregate([
+{
+    $match:{purchased:true}
+},
+{
+    $lookup:
+    {
+        from:"Items",
+        localField:"items",
+        foreignField:"_id",
+        as:"item_list"
+    }
+},
+{
+    $lookup:
+    {
+        from:"Users",
+        localField:"_id",
+        foreignField:"cart_id",
+        as:"user"
+    }
+},
+{
+    $match:{"user.age":{$gt:50}}
+},
+{
+    $set:
+    {
+        "cart_sum":{$sum:"$item_list.price"},
+        "age":"$user.age" 
+    }
+},
+{
+    $group:
+    {
+        _id:null,
+        "total_avg":{$avg:"$cart_sum"},
+        "avg_age":{$avg:{$arrayElemAt:["$age",0]}},
+    }
+},
+{
+    $project:
+    {
+        _id:0
+    }
+}])
+
+
+//6. Aprēķina vidējo iepirkumu summu vīriešiem un sievietēm
+// "Users.cart_id" == "Cards._id"
+// "Carts.items" -> "Items._id"
+// Avg("Items.price")
+
+db.Carts.aggregate([
+{
+    $lookup:
+    {
+        from:"Items",
+        localField:"items",
+        foreignField:"_id",
+        as:"item_list"
+    }
+},
+{
+    $lookup:
+    {
+        from:"Users",
+        localField:"_id",
+        foreignField:"cart_id",
+        as:"user"
+    }
+},
+{
+    $set:
+    {
+        "cart_sum":{$sum:"$item_list.price"},
+        "age":"$user.gender" 
+    }
+},
+{
+    $group:
+    {
+        _id:"$user.gender",
+        "total_avg":{$avg:"$cart_sum"},
+    }
+}])
+
+
+//7. Aprēķina preču summu katrā kategorijā un preču summu ņemot vērā skaitu noliktavā (stock) un atlaidi (discount)
+// "Items.categories" == "Categories._id"
+
+db.Items.aggregate([
+{
+    $lookup:
+    {
+        from:"Categories",
+        localField:"categories",
+        foreignField:"_id",
+        as:"category"
+    }
+},
+{
+    $set:
+    {
+        "cat":{$arrayElemAt:["$category.name",0]},
+        "stock_sum":{$multiply:[{$multiply:[{$subtract:[1,"$discount"]},"$price"]}, "$stock"]}
+    }
+},
+{
+    $group:
+    {
+        _id:"$cat",
+        "individual_sum":{$sum:"$price"},
+        "total_sum":{$sum:"$stock_sum"}
+
+    }
+},
+{
+    $project:
+    {
+        _id:1,
+        "individual_sum":1,
+        "total_sum":1
+        
+    }
+}])
